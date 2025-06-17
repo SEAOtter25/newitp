@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login to ITOPPLUS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="picture/image-Photoroom.png">
+    <style>
+        :root {
+            /* สีเขียวของบริษัท (Company Main Color) */
+            --company-green-light: #e8f5e9; /* Very light green, almost off-white for background base */
+            --company-green-main: #81c784; /* Main light green for accents, buttons */
+            --company-green-dark: #66bb6a; /* Darker green for hover states */
+
+            /* สีกลาง (Neutrals) */
+            --text-dark: #333;
+            --text-light: #666;
+            --card-bg: #fff;
+            --input-border: #e0e0e0;
+            --error-color: #ff6b6b;
+
+            /* เงา */
+            --shadow-light: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* พื้นหลังสีเขียวอ่อนไล่ไปขาว */
+            background: linear-gradient(135deg, var(--company-green-light) 0%, #ffffff 100%);
+            color: var(--text-dark);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .login-container {
+            display: flex;
+            background: var(--card-bg); /* พื้นหลังการ์ดเป็นสีขาว */
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium); /* เงาที่ชัดเจนขึ้นเล็กน้อย */
+            overflow: hidden;
+            max-width: 900px;
+            width: 90%;
+            animation: fadeInScale 0.6s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .login-illustration {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #89dd8d; /* ใช้สีเขียวหลักของบริษัทสำหรับฝั่งภาพประกอบ */
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-illustration img {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease-out;
+        }
+        .login-illustration:hover img {
+            transform: translateY(-5px); /* เพิ่ม animation เล็กน้อยเมื่อ hover */
+        }
+
+        .login-illustration h1 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .login-illustration p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Elements for visual interest in illustration background */
+        .login-illustration::before,
+        .login-illustration::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            filter: blur(50px);
+            z-index: 0;
+        }
+        .login-illustration::before {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            left: -50px;
+        }
+        .login-illustration::after {
+            width: 250px;
+            height: 250px;
+            bottom: -80px;
+            right: -80px;
+        }
+
+
+        .login-form-wrapper {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* จัดกึ่งกลางเนื้อหาในแนวนอน */
+        }
+
+        .login-form-wrapper .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-form-wrapper .logo img {
+            width: 80px;
+            height: auto;
+        }
+
+        .login-form-wrapper h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+            max-width: 350px; /* จำกัดความกว้างสูงสุด */
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 1.1rem;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .form-group input {
+            width: calc(100% - 30px); /* หัก padding สำหรับ icon */
+            padding: 12px 15px 12px 45px; /* เพิ่ม padding ซ้ายสำหรับ icon */
+            font-size: 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03); /* Shadow เล็กน้อยด้านใน */
+            margin-left: auto; /* จัดกึ่งกลาง */
+            margin-right: auto; /* จัดกึ่งกลาง */
+            display: block; /* ทำให้เป็น block เพื่อให้ margin auto ทำงาน */
+        }
+
+        .form-group input:focus {
+            border-color: var(--company-green-main); /* เปลี่ยนสีเส้นขอบเมื่อ focus */
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.2); /* Glow effect สีเขียว */
+            outline: none;
+            background-color: #fff;
+        }
+
+        .form-group input:focus + i {
+            color: var(--company-green-main); /* เปลี่ยนสี icon เมื่อ focus */
+        }
+
+        .btn-login {
+            width: 100%;
+            max-width: 350px; /* จำกัดความกว้างสูงสุดของปุ่ม */
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--company-green-main); /* ปุ่มสีเขียวหลักของบริษัท */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            margin-top: 15px;
+            margin-left: auto; /* จัดกึ่งกลาง */
+            margin-right: auto; /* จัดกึ่งกลาง */
+            display: block;
+        }
+
+        .btn-login:hover {
+            background-color: var(--company-green-dark); /* สีเขียวเข้มขึ้นเมื่อ hover */
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .forgot-password {
+            text-align: center; /* จัดกึ่งกลางลิงก์ */
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password a:hover {
+            color: var(--company-green-main); /* เปลี่ยนสีเมื่อ hover */
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                max-width: 400px;
+            }
+            .login-illustration {
+                padding: 30px;
+                order: -1; /* แสดง illustration ด้านบนใน mobile */
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .login-illustration h1 {
+                font-size: 1.8rem;
+            }
+            .login-illustration p {
+                font-size: 0.95rem;
+            }
+            .login-form-wrapper {
+                padding: 30px;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+                align-items: center; /* จัดกึ่งกลางในแนวนอนสำหรับ mobile ด้วย */
+            }
+            .login-form-wrapper h2 {
+                font-size: 1.5rem;
+            }
+            .form-group {
+                max-width: 100%; /* ให้เต็มความกว้างใน mobile */
+            }
+            .form-group input {
+                width: calc(100% - 30px);
+                margin-left: auto;
+                margin-right: auto;
+                display: block;
+            }
+            .btn-login {
+                max-width: 100%;
+            }
+            .forgot-password {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-illustration">
+            <img src="picture/itopplus-Photoroom.png    " alt="ITOPPLUS Illustration">
+            <h1>Welcome to ITOPPLUS!</h1>
+            <p>Your comprehensive solution for IT asset and personnel management. Log in to manage your resources efficiently.</p>
+        </div>
+        <div class="login-form-wrapper">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <input type="text" id="username" name="username" placeholder="Enter your username">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div id="usernameError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="password" name="password" placeholder="Enter your password">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div id="passwordError" class="error-message"></div>
+                </div>
+                <div class="forgot-password">
+                    <a href="#">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn-login" id="loginButton">
+                    Login
+                    </button>
+                <div id="loginError" class="error-message" style="margin-top: 15px;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+            const loginError = document.getElementById('loginError');
+            const loginButton = document.getElementById('loginButton');
+
+            // Optional: Auto-focus username on page load
+            usernameInput.focus();
+
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                usernameError.textContent = '';
+                passwordError.textContent = '';
+                loginError.textContent = '';
+                let isValid = true;
+
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                if (username === '') {
+                    usernameError.textContent = 'Username cannot be empty.';
+                    isValid = false;
+                }
+                if (password === '') {
+                    passwordError.textContent = 'Password cannot be empty.';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                loginButton.disabled = true; // Disable button during login
+                loginButton.innerHTML = 'Logging in... <span class="loading-spinner"></span>'; // Show loading state
+
+                try {
+                    const response = await fetch('http://localhost:3000/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        if (data.user) {
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Login Successful!',
+                                text: 'Redirecting to Dashboard...',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.href = 'dashboard.html';
+                            });
+                        } else {
+                            loginError.textContent = 'Login failed: No user data returned.';
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login Failed',
+                                text: 'No user data returned from server. Please try again.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    } else {
+                        loginError.textContent = data.message || 'Login failed. Please check your credentials.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Login Failed',
+                            text: data.message || 'Invalid username or password. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    loginError.textContent = 'Network error. Please try again later.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Could not connect to the server. Please try again later.',
+                        confirmButtonText: 'OK'
+                    });
+                } finally {
+                    loginButton.disabled = false; // Re-enable button
+                    loginButton.innerHTML = 'Login'; // Reset button text
+                }
+            });
+        });
+    </script>
+</body>
+</html>

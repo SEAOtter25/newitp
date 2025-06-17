@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITOPPLUS - Manage Notes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Variables จาก dashboard.html */
+        :root {
+            --company-green-light: #e8f5e9;
+            --company-green-main: #66bb6a;
+            --company-green-dark: #4caf50;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --app-bg-light: #f4f7f6;
+            --card-bg: #ffffff;
+            --panel-bg-dark: #2c3e50;
+            --panel-text-light: #ecf0f1;
+            --panel-active-bg: rgba(102, 187, 106, 0.15);
+            --panel-active-color: var(--company-green-main);
+            --shadow-subtle: 0 6px 20px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --color-blue: #3498db;
+            --color-orange: #f39c12;
+            --color-red: #e74c3c;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        /* Base Styles จาก dashboard.html */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: var(--app-bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .page-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Left Panel Styles (จาก dashboard.html) */
+        .left-panel {
+            width: 280px;
+            min-width: 280px;
+            background-color: var(--panel-bg-dark);
+            color: var(--panel-text-light);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            box-shadow: var(--shadow-subtle);
+            z-index: 20;
+            border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .panel-logo {
+            height: 45px;
+            width: auto;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+        }
+        .panel-title {
+            font-size: 2.0rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .panel-nav {
+            flex-grow: 1;
+        }
+        .panel-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .panel-nav li {
+            margin-bottom: 6px;
+        }
+        .panel-nav a {
+            display: flex;
+            align-items: center;
+            color: var(--panel-text-light);
+            text-decoration: none;
+            padding: 14px 15px;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.05rem;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+        }
+        .panel-nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--panel-active-color);
+            transform: translateX(8px);
+        }
+        .panel-nav a.active {
+            background: var(--panel-active-bg);
+            color: var(--panel-active-color);
+            font-weight: 600;
+            transform: translateX(5px);
+        }
+        .panel-nav a i {
+            margin-right: 18px;
+            font-size: 1.35rem;
+            width: 25px;
+            text-align: center;
+        }
+        .panel-quick-stats {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: 10px;
+        }
+        .panel-quick-stats h4 {
+            color: #fff;
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .stat-item i {
+            font-size: 2rem;
+            color: var(--company-green-main);
+            width: 35px;
+            text-align: center;
+        }
+        .stat-item .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+        .stat-item .stat-label {
+            font-size: 0.9rem;
+            color: var(--panel-text-light);
+        }
+        .panel-footer {
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding-left: 10px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--panel-text-light);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .user-profile .user-avatar {
+            font-size: 2.2rem;
+            color: var(--company-green-main);
+        }
+        .logout-btn {
+            background-color: var(--company-green-main);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius-md);
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logout-btn:hover {
+            background-color: var(--company-green-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content Area Styles (จาก dashboard.html) */
+        .main-content-area {
+            flex-grow: 1;
+            padding: 40px;
+            background-color: var(--app-bg-light);
+            position: relative;
+            border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+            margin-left: -20px;
+            z-index: 10;
+        }
+        .main-content-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 20px;
+        }
+        .main-content-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .main-content-header .user-display-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 1rem;
+            opacity: 0.9;
+            background-color: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-subtle);
+        }
+        .main-content-header .user-display-top i {
+            font-size: 1.6rem;
+            color: var(--company-green-main);
+        }
+        .main-content-header .user-display-top span {
+            color: var(--text-dark);
+        }
+
+        /* Card Base Styles (จาก dashboard.html) */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-subtle);
+            padding: 30px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+        }
+        .card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* --- Notes Page Specific Styles --- */
+
+        .note-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: flex-end;
+        }
+
+        .note-controls .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .note-controls .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .note-controls .input-group input[type="text"],
+        .note-controls .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dfe6e9;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: #f9fbfa;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .note-controls .input-group input[type="text"]:focus,
+        .note-controls .input-group select:focus {
+            border-color: var(--company-green-main);
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2);
+            outline: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            justify-content: center;
+        }
+
+        .btn.primary {
+            background-color: var(--company-green-main);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn.primary:hover {
+            background-color: var(--company-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .btn.secondary {
+            background-color: #ecf0f1;
+            color: var(--text-dark);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .btn.secondary:hover {
+            background-color: #dfe6e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn.danger {
+            background-color: var(--color-red);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn.danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .note-list-container {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 2-3 notes per row on larger screens */
+            gap: 25px;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-subtle);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* จัดให้เนื้อหาและปุ่มอยู่คนละส่วน */
+            min-height: 200px; /* กำหนดความสูงขั้นต่ำของการ์ด */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* จัดให้อยู่ด้านบน */
+            margin-bottom: 15px;
+        }
+        .note-header h4 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--company-green-main);
+            word-break: break-word; /* ให้ข้อความที่ยาวเกินตัดคำได้ */
+        }
+        .note-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            white-space: nowrap; /* ไม่ให้ขึ้นบรรทัดใหม่ */
+            margin-left: 10px;
+        }
+        .note-body {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            overflow: hidden; /* ซ่อนส่วนเกิน */
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* แสดงสูงสุด 4 บรรทัด */
+            -webkit-box-orient: vertical;
+        }
+        .note-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: auto; /* ดันปุ่มไปด้านล่างของการ์ด */
+        }
+        .note-actions .btn {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        .pagination button {
+            background-color: var(--card-bg);
+            border: 1px solid #dfe6e9;
+            border-radius: var(--border-radius-sm);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: var(--company-green-light);
+            border-color: var(--company-green-main);
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination span {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+
+        /* Modal Styles (สำหรับเพิ่ม/แก้ไข Note) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.is-open {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: auto;
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--shadow-hover);
+            position: relative;
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal.is-open .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+        .close-button {
+            color: var(--text-light);
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--color-red);
+            text-decoration: none;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 20px;
+        }
+        .modal-body .form-group label {
+            font-size: 1rem;
+        }
+        .modal-body .form-group input,
+        .modal-body .form-group textarea,
+        .modal-body .form-group select {
+            padding: 10px 15px;
+            font-size: 1rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+
+        /* Responsive Adjustments (จาก dashboard.html + เพิ่มเติม) */
+        @media (max-width: 1024px) {
+            .left-panel {
+                width: 250px;
+                min-width: 250px;
+                padding: 25px 15px;
+            }
+            .panel-nav a {
+                font-size: 1rem;
+            }
+            .panel-nav a i {
+                font-size: 1.15rem;
+            }
+            .main-content-area {
+                padding: 30px;
+                margin-left: -15px;
+            }
+            .main-content-header h1 {
+                font-size: 2.8rem;
+            }
+            .main-content-header .user-display-top {
+                font-size: 0.95rem;
+            }
+            .main-content-header .user-display-top i {
+                font-size: 1.4rem;
+            }
+            .card {
+                padding: 25px;
+            }
+            .note-list-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
+            }
+            .note-card {
+                padding: 20px;
+                min-height: 180px;
+            }
+            .note-header h4 {
+                font-size: 1.15rem;
+            }
+            .note-body {
+                font-size: 0.9rem;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .note-actions .btn {
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+            .modal-content {
+                padding: 25px;
+            }
+            .modal-header h3 {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-panel {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-out;
+                border-radius: 0;
+            }
+            .left-panel.active {
+                transform: translateX(0%);
+            }
+            .main-content-area {
+                margin-left: 0;
+                padding: 20px;
+                border-radius: 0;
+            }
+            .mobile-menu-toggle {
+                display: flex;
+                top: 20px;
+                left: 20px;
+            }
+            .main-content-header {
+                text-align: left;
+                margin-top: 70px;
+                margin-bottom: 25px;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-right: 0;
+            }
+            .main-content-header h1 {
+                font-size: 2.4rem;
+            }
+            .main-content-header .user-display-top {
+                margin-top: 15px;
+                align-self: stretch;
+                justify-content: center;
+                padding: 10px;
+            }
+            .note-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .note-controls .input-group {
+                width: 100%;
+                min-width: unset;
+            }
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+            }
+            .note-list-container {
+                grid-template-columns: 1fr; /* บนมือถือเรียงเป็นคอลัมน์เดียว */
+            }
+            .modal-content {
+                width: 95%; /* ขยาย modal บนมือถือ */
+                padding: 20px;
+            }
+            .modal-header h3 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="left-panel" id="leftPanel">
+            <div class="panel-header">
+                <span class="panel-title">ITOPPLUS</span>
+            </div>
+
+            <nav class="panel-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="manage.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Assets</span></a></li>
+                    <li><a href="assetowner.html"><i class="fa-solid fa-user-tag"></i> <span>Asset Owner</span></a></li>
+                    <li><a href="insert.html"><i class="fa-solid fa-plus-circle"></i> <span>Insert to Asset</span></a></li>
+                    <li><a href="note.html" class="active"><i class="fa-solid fa-note-sticky"></i> <span>Notes</span></a></li> 
+                    <li id="memberLinkWrapperLeftPanel"><a href="member.html"><i class="fa-solid fa-users"></i> <span>Member</span></a></li>
+                    <li id="historyLinkWrapperLeftPanel"><a href="history.html"><i class="fa-solid fa-history"></i> <span>History</span></a></li>
+                </ul>
+            </nav>
+
+            <div class="panel-quick-stats">
+                <h4>Quick Stats</h4>
+                <div class="stat-item">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                    <div>
+                        <span class="stat-value" id="assetsAddedMonth">0</span>
+                        <span class="stat-label">Assets Added (Month)</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-arrow-down-left-dots"></i>
+                    <div>
+                        <span class="stat-value" id="assetsRetiredMonth">0</span>
+                        <span class="stat-label">Assets Retired (Month)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div class="user-profile">
+                    <i class="fa-solid fa-user-circle user-avatar"></i>
+                    <span id="userNameDisplay">Guest User</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content-area">
+            <header class="main-content-header">
+                <h1>Manage Notes</h1> <div class="user-display-top">
+                    <span>Guest User</span>
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
+            </header>
+
+            <div class="notes-section card is-visible" data-delay="0">
+                <h3>All Notes</h3>
+
+                <div class="note-controls">
+                    <div class="input-group">
+                        <label for="searchNote">Search Note Title/Content:</label>
+                        <input type="text" id="searchNote" placeholder="Search by keyword">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn primary" id="addNoteBtn"><i class="fa-solid fa-plus"></i> Add New Note</button>
+                        <button class="btn secondary" id="applyNoteFiltersBtn"><i class="fa-solid fa-filter"></i> Apply Filter</button>
+                        <button class="btn secondary" id="clearNoteFiltersBtn"><i class="fa-solid fa-xmark"></i> Clear Filter</button>
+                    </div>
+                </div>
+
+                <div id="noteListContainer" class="note-list-container">
+                    <p style="grid-column: 1 / -1; text-align: center; padding: 20px;">No notes found.</p>
+                </div>
+
+                <div class="pagination">
+                    <button id="prevNotePageBtn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                    <span id="currentNotePageDisplay">Page 1 of 1</span>
+                    <button id="nextNotePageBtn" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Note</h3>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteId" name="note_id">
+                    <div class="form-group">
+                        <label for="noteTitle">Title:</label>
+                        <input type="text" id="noteTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteContent">Content:</label>
+                        <textarea id="noteContent" name="content" rows="8" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn secondary" id="cancelNoteBtn">Cancel</button>
+                        <button type="submit" class="btn primary" id="saveNoteBtn">Save Note</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // JavaScript สำหรับ Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const leftPanel = document.getElementById('leftPanel');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            leftPanel.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && !leftPanel.contains(event.target) && !mobileMenuToggle.contains(event.target) && leftPanel.classList.contains('active')) {
+                leftPanel.classList.remove('active');
+            }
+        });
+
+        // JavaScript สำหรับ Card Fade-in Animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                const delay = parseInt(card.dataset.delay) || 0;
+                setTimeout(() => {
+                    card.classList.add('is-visible');
+                }, delay);
+            });
+
+            // --- ส่วนของ JavaScript สำหรับ Manage Notes โดยเฉพาะ ---
+
+            // Dummy Data (จะถูกแทนที่ด้วยการเรียก API จริง)
+            let allNotes = [
+                { note_id: 1, title: 'Network Maintenance', content: 'Scheduled network maintenance for server room A on 2023-07-15. Expected downtime: 2 hours.', created_at: '2023-07-10' },
+                { note_id: 2, title: 'New Laptop Order', content: 'Placed an order for 10 new Dell XPS laptops. ETA: 2-3 weeks. Follow up with procurement.', created_at: '2023-07-08' },
+                { note_id: 3, title: 'Printer Issue - Office B', content: 'Printer in Office B (HP LaserJet 400) is showing paper jam error. Checked, still persists. Needs technician visit.', created_at: '2023-07-07' },
+                { note_id: 4, title: 'Software License Renewal', content: 'Renew Adobe Creative Cloud licenses by end of July. Send reminder to design team.', created_at: '2023-07-05' },
+                { note_id: 5, title: 'Server Rack Cleaning', content: 'Cleaned server rack in main data center. Dust levels reduced. Next cleaning due in 3 months.', created_at: '2023-07-01' },
+                { note_id: 6, title: 'VPN Configuration Update', content: 'Updated VPN client configuration for remote users. Instructions sent via email.', created_at: '2023-06-28' },
+                { note_id: 7, title: 'Monitor Calibration', content: 'Calibrated monitors in graphic design department. All screens are color accurate now.', created_at: '2023-06-25' },
+                { note_id: 8, title: 'Guest Wi-Fi Setup', content: 'Configured new guest Wi-Fi access point in lobby area. Password: GuestAccess2023.', created_at: '2023-06-20' },
+                { note_id: 9, title: 'Broken Keyboard - Desk 12', content: 'Keyboard at Desk 12 (Logitech K120) has non-functional spacebar. Replace with new one.', created_at: '2023-06-18' },
+                { note_id: 10, title: 'Annual Security Audit', content: 'Initiated annual security audit with external vendor. Provide necessary documentation by next week.', created_at: '2023-06-15' },
+                { note_id: 11, title: 'New Employee Onboarding', content: 'Prepare laptop and access for new marketing employee, Sarah Johnson, starting on 2023-07-20.', created_at: '2023-07-12' },
+                { note_id: 12, title: 'Meeting Room Projector Check', content: 'Checked projector in Meeting Room C. Lamp hours are high, recommend replacement soon.', created_at: '2023-07-11' }
+            ];
+
+            const noteListContainer = document.getElementById('noteListContainer');
+            const searchNoteInput = document.getElementById('searchNote');
+            const addNoteBtn = document.getElementById('addNoteBtn');
+            const applyNoteFiltersBtn = document.getElementById('applyNoteFiltersBtn');
+            const clearNoteFiltersBtn = document.getElementById('clearNoteFiltersBtn');
+            const prevNotePageBtn = document.getElementById('prevNotePageBtn');
+            const nextNotePageBtn = document.getElementById('nextNotePageBtn');
+            const currentNotePageDisplay = document.getElementById('currentNotePageDisplay');
+
+            const noteModal = document.getElementById('noteModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const closeButton = noteModal.querySelector('.close-button');
+            const noteForm = document.getElementById('noteForm');
+            const noteIdInput = document.getElementById('noteId');
+            const noteTitleInput = document.getElementById('noteTitle');
+            const noteContentInput = document.getElementById('noteContent');
+            const cancelNoteBtn = document.getElementById('cancelNoteBtn');
+
+            const notesPerPage = 6; // จำนวน Note ต่อหน้า
+            let currentNotePage = 1;
+            let filteredNotes = [];
+
+            // Function to render notes
+            function renderNotes() {
+                noteListContainer.innerHTML = ''; // Clear existing notes
+                const startIndex = (currentNotePage - 1) * notesPerPage;
+                const endIndex = startIndex + notesPerPage;
+                const notesToRender = filteredNotes.slice(startIndex, endIndex);
+
+                if (notesToRender.length === 0) {
+                    noteListContainer.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; padding: 20px;">No notes found matching your criteria.</p>`;
+                    currentNotePageDisplay.textContent = 'Page 0 of 0';
+                    prevNotePageBtn.disabled = true;
+                    nextNotePageBtn.disabled = true;
+                    return;
+                }
+
+                notesToRender.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'note-card';
+                    noteCard.setAttribute('data-id', note.note_id); // เก็บ id ไว้เพื่อ Edit/Delete
+
+                    noteCard.innerHTML = `
+                        <div class="note-header">
+                            <h4>${note.title}</h4>
+                            <span class="note-date">${note.created_at}</span>
+                        </div>
+                        <div class="note-body">
+                            ${note.content}
+                        </div>
+                        <div class="note-actions">
+                            <button class="btn secondary edit-note-btn" data-id="${note.note_id}"><i class="fa-solid fa-edit"></i> Edit</button>
+                            <button class="btn danger delete-note-btn" data-id="${note.note_id}"><i class="fa-solid fa-trash-alt"></i> Delete</button>
+                        </div>
+                    `;
+                    noteListContainer.appendChild(noteCard);
+                });
+
+                updateNotePaginationControls();
+                addNoteActionListeners(); // Attach listeners after rendering
+            }
+
+            // Function to apply filters
+            function applyNoteFilters() {
+                const searchTerm = searchNoteInput.value.toLowerCase();
+
+                filteredNotes = allNotes.filter(note => {
+                    const matchesSearch = searchTerm === '' ||
+                                          note.title.toLowerCase().includes(searchTerm) ||
+                                          note.content.toLowerCase().includes(searchTerm);
+                    return matchesSearch;
+                });
+
+                currentNotePage = 1; // Reset to first page after applying filters
+                renderNotes();
+            }
+
+            // Function to clear filters
+            function clearNoteFilters() {
+                searchNoteInput.value = '';
+                applyNoteFilters(); // Re-apply filters to show all notes
+            }
+
+            // Function to update pagination controls
+            function updateNotePaginationControls() {
+                const totalPages = Math.ceil(filteredNotes.length / notesPerPage);
+                currentNotePageDisplay.textContent = `Page ${totalPages > 0 ? currentNotePage : 0} of ${totalPages}`;
+                prevNotePageBtn.disabled = currentNotePage === 1;
+                nextNotePageBtn.disabled = currentNotePage === totalPages || totalPages === 0;
+            }
+
+            // --- Modal Functions ---
+            function openNoteModal(note = null) {
+                noteModal.classList.add('is-open');
+                if (note) {
+                    modalTitle.textContent = 'Edit Note';
+                    noteIdInput.value = note.note_id;
+                    noteTitleInput.value = note.title;
+                    noteContentInput.value = note.content;
+                } else {
+                    modalTitle.textContent = 'Add New Note';
+                    noteIdInput.value = ''; // Clear hidden ID for new note
+                    noteForm.reset(); // Clear all form fields
+                }
+            }
+
+            function closeNoteModal() {
+                noteModal.classList.remove('is-open');
+                noteForm.reset();
+            }
+
+            // Event Listeners for controls and pagination
+            addNoteBtn.addEventListener('click', () => openNoteModal());
+            applyNoteFiltersBtn.addEventListener('click', applyNoteFilters);
+            clearNoteFiltersBtn.addEventListener('click', clearNoteFilters);
+
+            prevNotePageBtn.addEventListener('click', () => {
+                if (currentNotePage > 1) {
+                    currentNotePage--;
+                    renderNotes();
+                }
+            });
+
+            nextNotePageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredNotes.length / notesPerPage);
+                if (currentNotePage < totalPages) {
+                    currentNotePage++;
+                    renderNotes();
+                }
+            });
+
+            // Modal close events
+            closeButton.addEventListener('click', closeNoteModal);
+            cancelNoteBtn.addEventListener('click', closeNoteModal);
+            window.addEventListener('click', (event) => {
+                if (event.target == noteModal) {
+                    closeNoteModal();
+                }
+            });
+
+            // Form submission for Add/Edit Note
+            noteForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const noteId = noteIdInput.value;
+                const title = noteTitleInput.value;
+                const content = noteContentInput.value;
+
+                if (noteId) {
+                    // Edit existing note
+                    console.log('Updating note:', { id: noteId, title, content });
+                    const index = allNotes.findIndex(n => n.note_id == noteId);
+                    if (index !== -1) {
+                        allNotes[index].title = title;
+                        allNotes[index].content = content;
+                        // In a real app, send PUT/PATCH request to API
+                        console.log('Note updated successfully (simulated).');
+                    }
+                } else {
+                    // Add new note
+                    const newNote = {
+                        note_id: allNotes.length > 0 ? Math.max(...allNotes.map(n => n.note_id)) + 1 : 1, // Generate unique ID
+                        title: title,
+                        content: content,
+                        created_at: new Date().toISOString().slice(0, 10) // Current date YYYY-MM-DD
+                    };
+                    allNotes.push(newNote);
+                    console.log('Adding new note:', newNote);
+                    // In a real app, send POST request to API
+                    console.log('Note added successfully (simulated).');
+                }
+                applyNoteFilters(); // Re-render notes to reflect changes
+                closeNoteModal();
+            });
+
+            // Function to add event listeners to dynamically created note cards
+            function addNoteActionListeners() {
+                document.querySelectorAll('.edit-note-btn').forEach(button => {
+                    button.onclick = (event) => {
+                        const id = event.currentTarget.dataset.id;
+                        const noteToEdit = allNotes.find(note => note.note_id == id);
+                        if (noteToEdit) {
+                            openNoteModal(noteToEdit);
+                        }
+                    };
+                });
+
+                document.querySelectorAll('.delete-note-btn').forEach(button => {
+                    button.onclick = (event) => {
+                        const id = event.currentTarget.dataset.id;
+                        if (confirm('Are you sure you want to delete this note?')) {
+                            // In a real app, send DELETE request to API
+                            allNotes = allNotes.filter(note => note.note_id != id); // Remove from dummy data
+                            console.log('Note deleted (simulated). Remaining notes:', allNotes);
+                            applyNoteFilters(); // Re-render notes after deletion
+                        }
+                    };
+                });
+            }
+
+
+            // Initial load of notes
+            applyNoteFilters();
+
+            // Logout Function (จาก dashboard.html)
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            // Function to set username (จาก dashboard.html)
+            function setUserName(name) {
+                const userNameElements = document.querySelectorAll('#userNameDisplay, .main-content-header .user-display-top span');
+                userNameElements.forEach(element => {
+                    element.textContent = name;
+                });
+            }
+
+            // User Role Management (ควรอยู่ในไฟล์ JS หลักที่ใช้ร่วมกัน เช่น main.js หรือ script.js)
+
+            setUserName(currentUser.name || currentUser.empid);
+
+            const memberLinkWrapper = document.getElementById('memberLinkWrapperLeftPanel');
+            const historyLinkWrapper = document.getElementById('historyLinkWrapperLeftPanel');
+
+            if (currentUser.role === 'Admin') {
+                if (memberLinkWrapper) memberLinkWrapper.style.display = 'list-item';
+                if (historyLinkWrapper) historyLinkWrapper.style.display = 'list-item';
+            } else if (currentUser.role === 'User') {
+                if (memberLinkWrapper) memberLinkWrapper.style.display = 'none';
+                if (historyLinkWrapper) historyLinkWrapper.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
