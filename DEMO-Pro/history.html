@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITOPPLUS - Activity History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Variables จาก dashboard.html */
+        :root {
+            --company-green-light: #e8f5e9;
+            --company-green-main: #66bb6a;
+            --company-green-dark: #4caf50;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --app-bg-light: #f4f7f6;
+            --card-bg: #ffffff;
+            --panel-bg-dark: #2c3e50;
+            --panel-text-light: #ecf0f1;
+            --panel-active-bg: rgba(102, 187, 106, 0.15);
+            --panel-active-color: var(--company-green-main);
+            --shadow-subtle: 0 6px 20px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --color-blue: #3498db;
+            --color-orange: #f39c12;
+            --color-red: #e74c3c;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        /* Base Styles จาก dashboard.html */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: var(--app-bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .page-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Left Panel Styles (จาก dashboard.html) */
+        .left-panel {
+            width: 280px;
+            min-width: 280px;
+            background-color: var(--panel-bg-dark);
+            color: var(--panel-text-light);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            box-shadow: var(--shadow-subtle);
+            z-index: 20;
+            border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .panel-logo {
+            height: 45px;
+            width: auto;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+        }
+        .panel-title {
+            font-size: 2.0rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .panel-nav {
+            flex-grow: 1;
+        }
+        .panel-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .panel-nav li {
+            margin-bottom: 6px;
+        }
+        .panel-nav a {
+            display: flex;
+            align-items: center;
+            color: var(--panel-text-light);
+            text-decoration: none;
+            padding: 14px 15px;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.05rem;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+        }
+        .panel-nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--panel-active-color);
+            transform: translateX(8px);
+        }
+        .panel-nav a.active {
+            background: var(--panel-active-bg);
+            color: var(--panel-active-color);
+            font-weight: 600;
+            transform: translateX(5px);
+        }
+        .panel-nav a i {
+            margin-right: 18px;
+            font-size: 1.35rem;
+            width: 25px;
+            text-align: center;
+        }
+        .panel-quick-stats {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: 10px;
+        }
+        .panel-quick-stats h4 {
+            color: #fff;
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .stat-item i {
+            font-size: 2rem;
+            color: var(--company-green-main);
+            width: 35px;
+            text-align: center;
+        }
+        .stat-item .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+        .stat-item .stat-label {
+            font-size: 0.9rem;
+            color: var(--panel-text-light);
+        }
+        .panel-footer {
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding-left: 10px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--panel-text-light);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .user-profile .user-avatar {
+            font-size: 2.2rem;
+            color: var(--company-green-main);
+        }
+        .logout-btn {
+            background-color: var(--company-green-main);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius-md);
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logout-btn:hover {
+            background-color: var(--company-green-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content Area Styles (จาก dashboard.html) */
+        .main-content-area {
+            flex-grow: 1;
+            padding: 40px;
+            background-color: var(--app-bg-light);
+            position: relative;
+            border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+            margin-left: -20px;
+            z-index: 10;
+        }
+        .main-content-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 20px;
+        }
+        .main-content-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .main-content-header .user-display-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 1rem;
+            opacity: 0.9;
+            background-color: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-subtle);
+        }
+        .main-content-header .user-display-top i {
+            font-size: 1.6rem;
+            color: var(--company-green-main);
+        }
+        .main-content-header .user-display-top span {
+            color: var(--text-dark);
+        }
+
+        /* Card Base Styles (จาก dashboard.html) */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-subtle);
+            padding: 30px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+        }
+        .card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Form Controls & Buttons (common across pages) */
+        .controls-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: flex-end;
+        }
+
+        .controls-section .input-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .controls-section .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .controls-section .input-group input[type="text"],
+        .controls-section .input-group input[type="date"],
+        .controls-section .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #dfe6e9;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: #f9fbfa;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .controls-section .input-group input[type="text"]:focus,
+        .controls-section .input-group input[type="date"]:focus,
+        .controls-section .input-group select:focus {
+            border-color: var(--company-green-main);
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2);
+            outline: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            justify-content: center;
+        }
+
+        .btn.primary {
+            background-color: var(--company-green-main);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn.primary:hover {
+            background-color: var(--company-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .btn.secondary {
+            background-color: #ecf0f1;
+            color: var(--text-dark);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .btn.secondary:hover {
+            background-color: #dfe6e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Styles for History */
+        .history-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: separate; /* เพื่อให้ border-radius ทำงานได้ */
+            border-spacing: 0; /* ลบช่องว่างระหว่างเซลล์ */
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden; /* ซ่อนส่วนเกินเมื่อมี border-radius */
+            box-shadow: var(--shadow-subtle);
+            min-width: 800px; /* เพื่อให้ไม่แคบเกินไปบนจอเล็ก */
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f0f4f7; /* เส้นแบ่งระหว่างแถว */
+        }
+
+        .history-table th {
+            background-color: #f7f9fa;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+            z-index: 1; /* ให้หัวตารางอยู่ด้านบนเมื่อ scroll */
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none; /* ไม่มีเส้นแบ่งที่แถวสุดท้าย */
+        }
+
+        .history-table tbody tr:hover {
+            background-color: var(--company-green-light);
+        }
+
+        /* Pagination (common across pages) */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        .pagination button {
+            background-color: var(--card-bg);
+            border: 1px solid #dfe6e9;
+            border-radius: var(--border-radius-sm);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: var(--company-green-light);
+            border-color: var(--company-green-main);
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination span {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Tag Styles for Action Types */
+        .action-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .action-tag.add { background-color: var(--company-green-main); }
+        .action-tag.update { background-color: var(--color-blue); }
+        .action-tag.delete { background-color: var(--color-red); }
+        .action-tag.login { background-color: var(--color-orange); }
+        .action-tag.view { background-color: var(--text-light); }
+        .action-tag.other { background-color: #6c757d; }
+
+
+        /* Responsive Adjustments (จาก dashboard.html + เพิ่มเติม) */
+        @media (max-width: 1024px) {
+            .left-panel {
+                width: 250px;
+                min-width: 250px;
+                padding: 25px 15px;
+            }
+            .panel-nav a {
+                font-size: 1rem;
+            }
+            .panel-nav a i {
+                font-size: 1.15rem;
+            }
+            .main-content-area {
+                padding: 30px;
+                margin-left: -15px;
+            }
+            .main-content-header h1 {
+                font-size: 2.8rem;
+            }
+            .main-content-header .user-display-top {
+                font-size: 0.95rem;
+            }
+            .main-content-header .user-display-top i {
+                font-size: 1.4rem;
+            }
+            .card {
+                padding: 25px;
+            }
+            .history-table th,
+            .history-table td {
+                padding: 12px 15px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .action-buttons {
+                flex-wrap: wrap; /* allow buttons to wrap */
+            }
+            .controls-section .input-group {
+                min-width: 150px; /* Adjust min-width for input groups */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-panel {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-out;
+                border-radius: 0;
+            }
+            .left-panel.active {
+                transform: translateX(0%);
+            }
+            .main-content-area {
+                margin-left: 0;
+                padding: 20px;
+                border-radius: 0;
+            }
+            .mobile-menu-toggle {
+                display: flex;
+                top: 20px;
+                left: 20px;
+            }
+            .main-content-header {
+                text-align: left;
+                margin-top: 70px;
+                margin-bottom: 25px;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-right: 0;
+            }
+            .main-content-header h1 {
+                font-size: 2.4rem;
+            }
+            .main-content-header .user-display-top {
+                margin-top: 15px;
+                align-self: stretch;
+                justify-content: center;
+                padding: 10px;
+            }
+            .controls-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .controls-section .input-group {
+                width: 100%;
+                min-width: unset;
+            }
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="left-panel" id="leftPanel">
+            <div class="panel-header">
+                <span class="panel-title">ITOPPLUS</span>
+            </div>
+
+            <nav class="panel-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="manage.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Assets</span></a></li>
+                    <li><a href="assetowner.html"><i class="fa-solid fa-user-tag"></i> <span>Asset Owner</span></a></li>
+                    <li><a href="insert.html"><i class="fa-solid fa-plus-circle"></i> <span>Insert to Asset</span></a></li>
+                    <li><a href="note.html"><i class="fa-solid fa-note-sticky"></i> <span>Notes</span></a></li>
+                    <li id="memberLinkWrapperLeftPanel"><a href="member.html"><i class="fa-solid fa-users"></i> <span>Member</span></a></li>
+                    <li id="historyLinkWrapperLeftPanel" style="display:active;"><a href="history.html" class="active">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>History</span></a></li>
+                </ul>
+            </nav>
+
+            <div class="panel-quick-stats">
+                <h4>Quick Stats</h4>
+                <div class="stat-item">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                    <div>
+                        <span class="stat-value" id="assetsAddedMonth">0</span>
+                        <span class="stat-label">Assets Added (Month)</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-arrow-down-left-dots"></i>
+                    <div>
+                        <span class="stat-value" id="assetsRetiredMonth">0</span>
+                        <span class="stat-label">Assets Retired (Month)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <div class="user-profile">
+                    <i class="fa-solid fa-user-circle user-avatar"></i>
+                    <span id="userNameDisplay">Guest User</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content-area">
+            <header class="main-content-header">
+                <h1>Activity History</h1> <div class="user-display-top">
+                    <span>Guest User</span>
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
+            </header>
+
+            <div class="history-section card is-visible" data-delay="0">
+                <h3>System Activity Log</h3>
+
+                <div class="controls-section">
+                    <div class="input-group">
+                        <label for="searchLog">Search (User/Details):</label>
+                        <input type="text" id="searchLog" placeholder="Search by keyword">
+                    </div>
+                    <div class="input-group">
+                        <label for="filterUser">Filter by User:</label>
+                        <select id="filterUser">
+                            <option value="">All Users</option>
+                            </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="filterActionType">Filter by Action Type:</label>
+                        <select id="filterActionType">
+                            <option value="">All Actions</option>
+                            <option value="Login">Login</option>
+                            <option value="Add">Add</option>
+                            <option value="Update">Update</option>
+                            <option value="Delete">Delete</option>
+                            <option value="View">View</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="filterDateFrom">Date From:</label>
+                        <input type="date" id="filterDateFrom">
+                    </div>
+                    <div class="input-group">
+                        <label for="filterDateTo">Date To:</label>
+                        <input type="date" id="filterDateTo">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn secondary" id="applyHistoryFiltersBtn"><i class="fa-solid fa-filter"></i> Apply Filter</button>
+                        <button class="btn secondary" id="clearHistoryFiltersBtn"><i class="fa-solid fa-xmark"></i> Clear Filter</button>
+                    </div>
+                </div>
+
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="4" style="text-align: center; padding: 20px;">No activity logs found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button id="prevHistoryPageBtn" disabled><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                    <span id="currentHistoryPageDisplay">Page 1 of 1</span>
+                    <button id="nextHistoryPageBtn" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <script>
+        // JavaScript สำหรับ Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const leftPanel = document.getElementById('leftPanel');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            leftPanel.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && !leftPanel.contains(event.target) && !mobileMenuToggle.contains(event.target) && leftPanel.classList.contains('active')) {
+                leftPanel.classList.remove('active');
+            }
+        });
+
+        // JavaScript สำหรับ Card Fade-in Animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                const delay = parseInt(card.dataset.delay) || 0;
+                setTimeout(() => {
+                    card.classList.add('is-visible');
+                }, delay);
+            });
+
+            // --- ส่วนของ JavaScript สำหรับ Activity History โดยเฉพาะ ---
+
+            // Dummy Data (จะถูกแทนที่ด้วยการเรียก API จริง)
+            let allHistory = [
+                { log_id: 1, timestamp: '2025-06-18 10:00:00', user: 'Alice Smith', action_type: 'Login', details: 'User logged in successfully.' },
+                { log_id: 2, timestamp: '2025-06-18 10:05:30', user: 'Alice Smith', action_type: 'Update', details: 'Updated asset: Laptop-001 (Location changed from A to B).' },
+                { log_id: 3, timestamp: '2025-06-18 10:10:15', user: 'Bob Johnson', action_type: 'View', details: 'Viewed details of asset: Monitor-005.' },
+                { log_id: 4, timestamp: '2025-06-17 15:20:00', user: 'Admin User', action_type: 'Add', details: 'Added new member: Jane Doe (EMP011).' },
+                { log_id: 5, timestamp: '2025-06-17 15:25:40', user: 'Admin User', action_type: 'Delete', details: 'Deleted old member: John Doe (EMP007).' },
+                { log_id: 6, timestamp: '2025-06-17 11:45:00', user: 'Charlie Brown', action_type: 'Add', details: 'Added new note: "Meeting Room Projector Issue".' },
+                { log_id: 7, timestamp: '2025-06-16 09:30:00', user: 'Alice Smith', action_type: 'Login', details: 'User logged in successfully.' },
+                { log_id: 8, timestamp: '2025-06-16 09:40:00', user: 'Alice Smith', action_type: 'Add', details: 'Inserted new asset: Server Rack 3 (IT-SR003).' },
+                { log_id: 9, timestamp: '2025-06-15 14:00:00', user: 'Bob Johnson', action_type: 'Update', details: 'Updated asset owner: Desktop-010 (Assigned to Emily White).' },
+                { log_id: 10, timestamp: '2025-06-14 08:00:00', user: 'Alice Smith', action_type: 'Login', details: 'User logged in successfully.' },
+                { log_id: 11, timestamp: '2025-06-14 08:10:00', user: 'Alice Smith', action_type: 'View', details: 'Viewed Dashboard Analytics.' },
+                { log_id: 12, timestamp: '2025-06-13 17:00:00', user: 'Admin User', action_type: 'Update', details: 'Changed role of Bob Johnson from User to Admin.' },
+                { log_id: 13, timestamp: '2025-06-13 17:15:00', user: 'Admin User', action_type: 'Login', details: 'Admin User logged in.' },
+                { log_id: 14, timestamp: '2025-06-12 10:00:00', user: 'Charlie Brown', action_type: 'Delete', details: 'Deleted note: "Old Network Diagram".' },
+                { log_id: 15, timestamp: '2025-06-11 11:00:00', user: 'Bob Johnson', action_type: 'Add', details: 'Added new asset owner: Tech Support Department.' }
+            ];
+
+            const historyTableBody = document.getElementById('historyTableBody');
+            const searchLogInput = document.getElementById('searchLog');
+            const filterUserSelect = document.getElementById('filterUser');
+            const filterActionTypeSelect = document.getElementById('filterActionType');
+            const filterDateFromInput = document.getElementById('filterDateFrom');
+            const filterDateToInput = document.getElementById('filterDateTo');
+            const applyHistoryFiltersBtn = document.getElementById('applyHistoryFiltersBtn');
+            const clearHistoryFiltersBtn = document.getElementById('clearHistoryFiltersBtn');
+            const prevHistoryPageBtn = document.getElementById('prevHistoryPageBtn');
+            const nextHistoryPageBtn = document.getElementById('nextHistoryPageBtn');
+            const currentHistoryPageDisplay = document.getElementById('currentHistoryPageDisplay');
+
+            const logsPerPage = 10; // จำนวน Log ต่อหน้า
+            let currentHistoryPage = 1;
+            let filteredHistory = [];
+
+            // Populate unique users for filter
+            function populateUserFilter() {
+                const uniqueUsers = [...new Set(allHistory.map(log => log.user))].sort();
+                filterUserSelect.innerHTML = '<option value="">All Users</option>';
+                uniqueUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = user;
+                    filterUserSelect.appendChild(option);
+                });
+            }
+
+            // Function to get action tag class
+            function getActionTagClass(actionType) {
+                switch (actionType) {
+                    case 'Add': return 'add';
+                    case 'Update': return 'update';
+                    case 'Delete': return 'delete';
+                    case 'Login': return 'login';
+                    case 'View': return 'view';
+                    default: return 'other';
+                }
+            }
+
+            // Function to render history logs in table
+            function renderHistory() {
+                historyTableBody.innerHTML = ''; // Clear existing rows
+                const startIndex = (currentHistoryPage - 1) * logsPerPage;
+                const endIndex = startIndex + logsPerPage;
+                const logsToRender = filteredHistory.slice(startIndex, endIndex);
+
+                if (logsToRender.length === 0) {
+                    historyTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">No activity logs found matching your criteria.</td></tr>`;
+                    currentHistoryPageDisplay.textContent = 'Page 0 of 0';
+                    prevHistoryPageBtn.disabled = true;
+                    nextHistoryPageBtn.disabled = true;
+                    return;
+                }
+
+                logsToRender.forEach(log => {
+                    const row = historyTableBody.insertRow();
+                    const actionTagClass = getActionTagClass(log.action_type);
+                    row.innerHTML = `
+                        <td>${log.timestamp}</td>
+                        <td>${log.user}</td>
+                        <td><span class="action-tag ${actionTagClass}">${log.action_type}</span></td>
+                        <td>${log.details}</td>
+                    `;
+                });
+
+                updateHistoryPaginationControls();
+            }
+
+            // Function to apply filters
+            function applyHistoryFilters() {
+                const searchTerm = searchLogInput.value.toLowerCase();
+                const filterUser = filterUserSelect.value;
+                const filterActionType = filterActionTypeSelect.value;
+                const filterDateFrom = filterDateFromInput.value;
+                const filterDateTo = filterDateToInput.value;
+
+                filteredHistory = allHistory.filter(log => {
+                    const logDate = log.timestamp.split(' ')[0]; // YYYY-MM-DD
+
+                    const matchesSearch = searchTerm === '' ||
+                                          log.user.toLowerCase().includes(searchTerm) ||
+                                          log.details.toLowerCase().includes(searchTerm);
+                    const matchesUser = filterUser === '' || log.user === filterUser;
+                    const matchesActionType = filterActionType === '' || log.action_type === filterActionType;
+                    const matchesDateFrom = filterDateFrom === '' || logDate >= filterDateFrom;
+                    const matchesDateTo = filterDateTo === '' || logDate <= filterDateTo;
+
+                    return matchesSearch && matchesUser && matchesActionType && matchesDateFrom && matchesDateTo;
+                });
+
+                // Sort by timestamp descending (newest first)
+                filteredHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+
+                currentHistoryPage = 1; // Reset to first page after applying filters
+                renderHistory();
+            }
+
+            // Function to clear filters
+            function clearHistoryFilters() {
+                searchLogInput.value = '';
+                filterUserSelect.value = '';
+                filterActionTypeSelect.value = '';
+                filterDateFromInput.value = '';
+                filterDateToInput.value = '';
+                applyHistoryFilters(); // Re-apply filters to show all logs
+            }
+
+            // Function to update pagination controls
+            function updateHistoryPaginationControls() {
+                const totalPages = Math.ceil(filteredHistory.length / logsPerPage);
+                currentHistoryPageDisplay.textContent = `Page ${totalPages > 0 ? currentHistoryPage : 0} of ${totalPages}`;
+                prevHistoryPageBtn.disabled = currentHistoryPage === 1;
+                nextHistoryPageBtn.disabled = currentHistoryPage === totalPages || totalPages === 0;
+            }
+
+            // Event Listeners for controls and pagination
+            applyHistoryFiltersBtn.addEventListener('click', applyHistoryFilters);
+            clearHistoryFiltersBtn.addEventListener('click', clearHistoryFilters);
+
+            prevHistoryPageBtn.addEventListener('click', () => {
+                if (currentHistoryPage > 1) {
+                    currentHistoryPage--;
+                    renderHistory();
+                }
+            });
+
+            nextHistoryPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredHistory.length / logsPerPage);
+                if (currentHistoryPage < totalPages) {
+                    currentHistoryPage++;
+                    renderHistory();
+                }
+            });
+
+            // Initial setup
+            populateUserFilter(); // Populate user filter dropdown
+            applyHistoryFilters(); // Initial render of history logs
+
+            // Logout Function (จาก dashboard.html)
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            // Function to set username (จาก dashboard.html)
+            function setUserName(name) {
+                const userNameElements = document.querySelectorAll('#userNameDisplay, .main-content-header .user-display-top span');
+                userNameElements.forEach(element => {
+                    element.textContent = name;
+                });
+            }
+
+            // User Role Management & Active Link (ควรอยู่ในไฟล์ JS หลักที่ใช้ร่วมกัน เช่น main.js หรือ script.js)
+
+            setUserName(currentUser.name || currentUser.empid);
+
+            // Set active link in panel-nav for current page
+            const currentPath = window.location.pathname.split('/').pop();
+            const panelLinks = document.querySelectorAll('.panel-nav a');
+            panelLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+
+            const memberLinkWrapper = document.getElementById('memberLinkWrapperLeftPanel');
+            const historyLinkWrapper = document.getElementById('historyLinkWrapperLeftPanel');
+
+            if (currentUser.role === 'Admin') {
+                if (memberLinkWrapper) memberLinkWrapper.style.display = 'list-item';
+                if (historyLinkWrapper) historyLinkWrapper.style.display = 'list-item';
+            } else if (currentUser.role === 'User') {
+                if (memberLinkWrapper) memberLinkWrapper.style.display = 'none';
+                if (historyLinkWrapper) historyLinkWrapper.style.display = 'none';
+                // ถ้าเป็น User และพยายามเข้าหน้า History.html ให้ redirect กลับไป dashboard
+                if (currentPath === 'history.html') {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
