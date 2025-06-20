@@ -1,0 +1,9 @@
+[20-Jun-2025 05:02:54 Europe/Berlin] Attempt Method 2: Using file_get_contents('php://input').
+[20-Jun-2025 05:02:54 Europe/Berlin] Raw input after attempts: true
+[20-Jun-2025 05:02:54 Europe/Berlin] JSON Decode Error: No error
+[20-Jun-2025 05:02:54 Europe/Berlin] Decoded data (print_r): 1
+[20-Jun-2025 05:02:54 Europe/Berlin] Final check: Data is empty or not an array, or JSON decode failed.
+[20-Jun-2025 05:05:26 Europe/Berlin] Attempt Method 2: Using file_get_contents('php://input').
+[20-Jun-2025 05:05:26 Europe/Berlin] Raw input from Method 2: true
+[20-Jun-2025 05:05:26 Europe/Berlin] Final check: Data is empty or not an array after all attempts. This often means JSON was not received correctly.
+[20-Jun-2025 05:05:26 Europe/Berlin] Decoded data (print_r at final check): 1
